@@ -6,6 +6,7 @@ import datetime as dt
 import matplotlib.animation as animation
 import matplotlib.ticker as mticker
 from matplotlib.patches import Arrow
+from matplotlib.dates import DateFormatter
 
 def get_CellVoltages(bmu,i):
     out_BMU = [data[bmu+'_Cell_1_Voltage'][i], data[bmu+'_Cell_2_Voltage'][i],
@@ -96,7 +97,7 @@ ysmodC = []
 # minMod = 0
 # maxMod = 0
 
-interval = 45
+interval = 10
 # interval = 10*60
 shift = -.06
 shift2 = -.05
@@ -141,33 +142,47 @@ origins = (0.89+shift, 3.33+shift, 6.725+shift+shift3, 9.15+shift+shift3)
 
 # arrow1 = ax1.arrow(0,0,0,0,length_includes_head=True, head_width=.5, width=.5, facecolor='black')
 
+# Initiate Plots
+P = axmodP.plot(xs,ysmodP, 'b', label='Power')
+C = axmodP.plot(xs,ysmodC, 'r', label='Current')
+V = axmodV.plot(xs,ysmodV, 'g', label='Voltage')
 
+
+# Format Plots
+axmodP.tick_params(direction='in', labelcolor='white')
+axmodV.tick_params(direction='in', labelcolor='white')
+# axmodV.set_xticklabels(axmodV.get_xticks(), rotation=60)
+axmodV.set_yticks(np.arange(0,601,75))
+
+axmodV.yaxis.grid()
+
+lns = V + P + C
+labs = [l.get_label() for l in lns]
+axmodV.legend(lns, labs, bbox_to_anchor=(0.5, -0.4), loc='lower center', 
+                ncol=3, facecolor='white', edgecolor='black', framealpha=1)
+axmodP.set_ylim(-80, 80)
+axmodV.set_ylim(0,600)
+
+axmodP.set_title('Modbus Power, Current, and Voltage', color='white')
+
+# axmodP.set_ylabel('Power [W]', color='white')
+axmodV.set_ylabel('Voltage [V]', color='white')
+axmodP.set_ylabel('Power [W], Current [A]', color='white')
+axmodV.set_xlabel('Time [minutes]', color='white')
 
 
 # This function is called periodically from FuncAnimation
 def animate(i, xs, ysmodP, ysmodV, ysmodC, origins):
 
-    # # Read temperature (Celsius) from TMP102
-    # temp_c = round(tmp102.read_temp(), 2)
-
     # Get datetime
     dt_now = dt.datetime.now().strftime('%H:%M:%S')
-    # second = int(dt.datetime.now().strftime('%S'))
-    # xs.append(second)
-    xs.append(dt.datetime.now().strftime('%S'))
+    minute = int(dt.datetime.now().strftime('%M'))
+    second = int(dt.datetime.now().strftime('%S'))
+    xs.append(minute + second/60)
+    # xs.append(dt.datetime.now().strftime('%H:%M:%S.%f'))
+    
 
     timestamp_var.set_text('timestamp: ' + dt_now)
-
-    # # Get cell voltages, and max/min cell voltages
-    # BMU1_cellV = get_CellVoltages('BMU01',i)
-    # BMU2_cellV = get_CellVoltages('BMU02',i)
-    # BMU3_cellV = get_CellVoltages('BMU03',i)
-    # BMU4_cellV = get_CellVoltages('BMU04',i)
-    # BMU5_cellV = get_CellVoltages('BMU05',i)
-    # BMU6_cellV = get_CellVoltages('BMU06',i)
-    # BMU7_cellV = get_CellVoltages('BMU07',i)
-    # BMU8_cellV = get_CellVoltages('BMU08',i)
-    # BMU_cellV = BMU1_cellV + BMU2_cellV + BMU3_cellV + BMU4_cellV + BMU5_cellV + BMU6_cellV + BMU7_cellV + BMU8_cellV
 
     # Get max and min cell/module voltages
     max_voltages = [data['BMU01_Max_Cell_Voltage'][i], data['BMU02_Max_Cell_Voltage'][i],
@@ -240,53 +255,19 @@ def animate(i, xs, ysmodP, ysmodV, ysmodC, origins):
     ysmodV = ysmodV[low:]
     ysmodC = ysmodC[low:]
 
-    # Draw x and y lists
-    axmodP.clear()
-    axmodV.clear()
-
-
-    # P = axmodP.plot(np.arange(len(xs)),ysmodP, 'b', label='Power')
-    # C = axmodP.plot(np.arange(len(xs)),ysmodC, 'r', label='Current')
-    # V = axmodV.plot(np.arange(len(xs)),ysmodV, 'g', label='Voltage')
+    # P[0].set_data(np.arange(len(xs)),ysmodP)
+    # C[0].set_data(np.arange(len(xs)),ysmodC)
+    # V[0].set_data(np.arange(len(xs)),ysmodV)
+    P[0].set_data(xs,ysmodP)
+    C[0].set_data(xs,ysmodC)
+    V[0].set_data(xs,ysmodV)
     # axmodV.set_xticklabels(xs)
-
-    P = axmodP.plot(xs,ysmodP, 'b', label='Power')
-    C = axmodP.plot(xs,ysmodC, 'r', label='Current')
-    V = axmodV.plot(xs,ysmodV, 'g', label='Voltage')
-
-
-    # Format plot
-    # axmodV.set_xticklabels([])
-    # axmodP.set_xticklabels([])
-    # axmodV.tick_params(direction='in', labelcolor='white')
-    axmodP.tick_params(direction='in', labelcolor='white')
-    axmodV.tick_params(direction='in', labelcolor='white')
-    axmodV.set_xticklabels(axmodV.get_xticks(), rotation=60)
-    axmodV.set_yticks([0,75,150,225,300,375,450,525,600])
-    axmodV.set_yticks(np.arange(0,601,75))
-
-    axmodV.yaxis.grid()
-
-    lns = V + P + C
-    labs = [l.get_label() for l in lns]
-    axmodV.legend(lns, labs, bbox_to_anchor=(0.5, -0.4), loc='lower center', 
-                    ncol=3, facecolor='white', edgecolor='black', framealpha=1)
-    # axmodV.legend(lns, labs, loc='lower center')
-    # axmodV.legend(loc='lower left')
-    # axmodP.legend(loc='lower right')
-
-    axmodP.set_ylim(-80, 80)
-    axmodV.set_ylim(0,600)
-    axmodV.set_xlim(xs[low], xs[-1])
-
-    axmodP.set_title('Modbus Power, Current, and Voltage', color='white')
-
-    # axmodP.set_ylabel('Power [W]', color='white')
-    axmodV.set_ylabel('Voltage [V]', color='white')
-    axmodP.set_ylabel('Power [W], Current [A]', color='white')
-    axmodV.set_xlabel('Time [seconds]', color='white')
+    # axmodV.fmt_xdata="{%:.2f}".format(xs)
+    axmodV.set_xlim(xs[0], xs[-1])
+    # axmodV.set_xticks(np.arange(xs[low], xs[-1],.1))
+    # axmodV.fmt_xdata = DateFormatter('%S') 
 
 # Set up plot to call animate() function periodically
-ani = animation.FuncAnimation(fig, animate, fargs=(xs, ysmodP, ysmodV, ysmodC, origins), interval=900)
+ani = animation.FuncAnimation(fig, animate, fargs=(xs, ysmodP, ysmodV, ysmodC, origins), interval=100)
 plt.show()
 
