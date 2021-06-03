@@ -51,6 +51,35 @@ axV = plt.axes([.54, .5, .3, .3])
 axMP = plt.axes([.06, .1, .3, .3])
 axmP = plt.axes([.54, .1, .3, .3])
 
+axmodV.set_xticklabels([])
+axmodP.set_xticklabels([])
+axV.set_xticklabels([])
+axmodV.tick_params(direction='in', labelcolor='white')
+axmodP.tick_params(direction='in', labelcolor='white')
+axV.tick_params(direction='in', labelcolor='white')
+axMP.tick_params(labelrotation=60, direction='in', labelcolor='white')
+axmP.tick_params(labelrotation=60, direction='in', labelcolor='white')
+
+
+
+axmodP.set_title('Modbus Power and Voltage', color='white')
+axV.set_title('Cell Voltage', color='white')  
+axMP.set_title('Max Cell Voltage per Module', color='white')
+axmP.set_title('Min Cell Voltage per Module', color='white')
+
+axmodP.set_ylabel('Power [W]', color='white')
+axmodV.set_ylabel('Voltage [V]', color='white')
+axV.set_ylabel('Voltage [V]', color='white')
+axMP.set_ylabel('Power [W]', color='white')
+axmP.set_ylabel('Power [W]', color='white')
+
+axMP.set_xlabel('Time [seconds]', color='white')
+axmP.set_xlabel('Time [seconds]', color='white')
+# axMP.set_xticklabels(rotation=45, ha='right')
+# plt.xticks(rotation=45, ha='right')
+# plt.subplots_adjust(bottom=0.30)
+
+
 xs = []
 ysmodP = []
 ysmodV = []
@@ -65,6 +94,18 @@ interval = 30
 textvar = plt.figtext(.03, .95, 'timestamp: ', fontsize=12, color='white')
 plt.figtext(.71, .97, 'Center for Energy Research - Energy Storage Innovation', color='white')
 
+modP = axmodP.plot(np.arange(len(xs)),ysmodP, 'b', label='Power')
+modV = axmodV.plot(np.arange(len(xs)),ysmodV, 'g', label='Voltage')
+# V = axV.plot(np.arange(len(xs)),ysV)
+MP = axMP.plot(np.arange(len(xs)),ysMP)
+mP = axmP.plot(np.arange(len(xs)),ysmP)
+
+axmodP.set_ylim(-80, 80)
+axmodV.set_ylim(0,500)
+axV.set_ylim(3.7, 4)
+axMP.set_ylim(3.7, 4)
+axmP.set_ylim(3.7, 4)
+
 # This function is called periodically from FuncAnimation
 def animate(i, xs, ysmodP, ysmodV, ysV, ysMP, ysmP):
 
@@ -75,10 +116,6 @@ def animate(i, xs, ysmodP, ysmodV, ysV, ysMP, ysmP):
     dt_now = dt.datetime.now().strftime('%H:%M:%S')
     second = int(dt.datetime.now().strftime('%S'))
     xs.append(second)
-    # xs.append(dt.datetime.now().strftime('%S'))
-    # ys.append(temp_c)
-    # for txt in fig.texts:
-    #     txt.set_visible(False)
     textvar.set_text('timestamp: ' + dt_now)
     # textvar = plt.figtext(.03, .95, , fontsize=12)
 
@@ -121,49 +158,27 @@ def animate(i, xs, ysmodP, ysmodV, ysV, ysMP, ysmP):
     ysMP = ysMP[low:]
     ysmP = ysmP[low:]
 
-    # Draw x and y lists
-    axmodP.clear()
-    axmodV.clear()
-    axV.clear()
-    axMP.clear()
-    axmP.clear()
+    x_plot = np.arange(len(xs))
 
-    # axPV.plot(xs, ysPV)
-    # axV.plot(xs, ysV)
-    # axMP.plot(xs, ysMP)
-    # axmP.plot(xs, ysmP)
-    P = axmodP.plot(np.arange(len(xs)),ysmodP, 'b', label='Power')
-    V = axmodV.plot(np.arange(len(xs)),ysmodV, 'g', label='Voltage')
-    axV.plot(np.arange(len(xs)),ysV)
-    axMP.plot(np.arange(len(xs)),ysMP)
-    axMP.set_xticklabels(xs)
-    axmP.plot(np.arange(len(xs)),ysmP)
-    axmP.set_xticklabels(xs)
+    modP[0].set_xdata(np.arange(len(xs)))
+    modP[0].set_ydata(ysmodP)
 
-    # axMP.xaxis.set_major_locator(mticker.MaxNLocator(6))
-    # MP_ticks_loc = axMP.get_xticks().tolist()
-    # axMP.xaxis.set_major_locator(mticker.FixedLocator(MP_ticks_loc))
-    # axMP.set_xticklabels([label_format.format(x) for x in MP_ticks_loc])
+    modV[0].set_xdata(np.arange(len(xs)))
+    modV[0].set_ydata(ysmodV)
 
-    
+    # V[0].set_xdata(np.arange(len(xs)))
+    # V[0].set_ydata(ysV)
 
-    # Format plot
-    axmodV.set_xticklabels([])
-    axmodP.set_xticklabels([])
-    axV.set_xticklabels([])
-    axmodV.tick_params(direction='in', labelcolor='white')
-    axmodP.tick_params(direction='in', labelcolor='white')
-    axV.tick_params(direction='in', labelcolor='white')
-    axMP.tick_params(labelrotation=60, direction='in', labelcolor='white')
-    axmP.tick_params(labelrotation=60, direction='in', labelcolor='white')
-    # axMP.set_xticklabels(rotation=45, ha='right')
-    # plt.xticks(rotation=45, ha='right')
-    # plt.subplots_adjust(bottom=0.30)
+    MP[0].set_xdata(np.arange(len(xs)))
+    MP[0].set_ydata(ysMP)
 
-    # legends
-    # axV.legend(['Cell 1', 'Cell 2', 'Cell 3', 'Cell 4', 'Cell 5', 'Cell 6', 
-    #             'Cell 7', 'Cell 8', 'Cell 9', 'Cell 10', 'Cell 11', 'Cell 12'])
-    lns = P + V
+    mP[0].set_xdata(np.arange(len(xs)))
+    mP[0].set_ydata(ysmP)
+
+    axmodP.set_xlim(x_plot[0], x_plot[-1:])
+    axmodV.set_xlim(x_plot[0], x_plot[-1:])
+
+    lns = modP + modV
     labs = [l.get_label() for l in lns]
     axmodV.legend(lns, labs, bbox_to_anchor=(1.05, 1.0), loc='upper left')
     axMP.legend(['BMU01', 'BMU02', 'BMU03', 'BMU04', 'BMU05', 'BMU06', 'BMU07', 'BMU08'],
@@ -171,48 +186,13 @@ def animate(i, xs, ysmodP, ysmodV, ysV, ysMP, ysmP):
     axmP.legend(['BMU01', 'BMU02', 'BMU03', 'BMU04', 'BMU05', 'BMU06', 'BMU07', 'BMU08'],
             bbox_to_anchor=(1.05, 1.0), loc='upper left')
 
-    axmodP.set_ylim(-80, 80)
-    axmodV.set_ylim(0,500)
-    axV.set_ylim(3.7, 4)
-    axMP.set_ylim(3.7, 4)
-    axmP.set_ylim(3.7, 4)
 
-    axmodP.set_title('Modbus Power and Voltage', color='white')
-    axV.set_title('Cell Voltage', color='white')  
-    axMP.set_title('Max Cell Voltage per Module', color='white')
-    axmP.set_title('Min Cell Voltage per Module', color='white')
-
-    axmodP.set_ylabel('Power [W]', color='white')
-    axmodV.set_ylabel('Voltage [V]', color='white')
-    axV.set_ylabel('Voltage [V]', color='white')
-    axMP.set_ylabel('Power [W]', color='white')
-    axmP.set_ylabel('Power [W]', color='white')
-
-    axMP.set_xlabel('Time [seconds]', color='white')
-    axmP.set_xlabel('Time [seconds]', color='white')
 
 # Set up plot to call animate() function periodically
-ani = animation.FuncAnimation(fig, animate, fargs=(xs, ysmodP, ysmodV, ysV, ysMP, ysmP), interval=100)
+ani = animation.FuncAnimation(fig, animate, fargs=(xs, ysmodP, ysmodV, ysV, ysMP, ysmP), interval=10)
 plt.show()
 
-# fig, ((ax1, ax2), (ax3, axmP)) = plt.subplots(2, 2)
-# ax1.set_xticks([])
-# ax2.set_xticks([])
-# ax3.tick_params(labelrotation=45)
-# axmP.tick_params(labelrotation=45)
 
-# ax1.set_title('Modbus Power')
-# ax2.set_title('Modbus Current')
-# ax3.set_title('Modbus Voltage')
-
-# for i in range(data.shape[0]):
-#     t = data['time'][i]
-#     ax1.plot(t,data['modbus_Power'][i])
-#     ax2.plot(t,data['modbus_Current'][i])
-#     ax3.plot(t,data['modbus_Voltage'][i])
-#     plt.pause(0.05)
-
-# plt.show()
 
 
 
